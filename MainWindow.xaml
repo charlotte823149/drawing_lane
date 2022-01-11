@@ -1,0 +1,168 @@
+﻿<Window
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:System="clr-namespace:System;assembly=mscorlib"
+    xmlns:Control="clr-namespace:drawing_lane.Control" xmlns:Data="clr-namespace:drawing_lane.Data" x:Name="window" x:Class="drawing_lane.MainWindow"
+    mc:Ignorable="d"
+    Title="drawing_lane" Height="1040" Width="1920" WindowState="Maximized" AllowDrop="True">
+    <!--set custom command-->
+    <Window.Resources>
+        <RoutedCommand x:Key="F1" />
+        <RoutedCommand x:Key="F2" />
+        <RoutedCommand x:Key="F3" />
+        <RoutedCommand x:Key="F4" />
+        <RoutedCommand x:Key="Save" />
+        <RoutedCommand x:Key="Choose" />
+        <RoutedCommand x:Key="Return" />
+        <RoutedCommand x:Key="ZoomIn" />
+        <RoutedCommand x:Key="ZoomOut" />
+        <RoutedCommand x:Key="CopyImage" />
+        <RoutedCommand x:Key="Focus" />
+        <RoutedCommand x:Key="Add" />
+        <RoutedCommand x:Key="Delete" />
+    </Window.Resources>
+    <!--assign shortcut keys-->
+    <Window.InputBindings>
+        <KeyBinding Gesture="F1" Command="{StaticResource F1}" />
+        <KeyBinding Gesture="F2" Command="{StaticResource F2}" />
+        <KeyBinding Gesture="F3" Command="{StaticResource F3}" />
+        <KeyBinding Gesture="F4" Command="{StaticResource F4}" />
+        <KeyBinding Gesture="Ctrl+S" Command="{StaticResource Save}" />
+        <KeyBinding Gesture="Ctrl+C" Command="{StaticResource Choose}" />
+        <KeyBinding Gesture="Ctrl+Z" Command="{StaticResource Return}" />
+        <KeyBinding Gesture="Add" Command="{StaticResource ZoomIn}" />
+        <KeyBinding Gesture="Subtract" Command="{StaticResource ZoomOut}" />
+    </Window.InputBindings>
+    <!--binding together-->
+    <Window.CommandBindings>
+        <CommandBinding Command="{StaticResource F1}" CanExecute="CanExecute" Executed="F1" />
+        <CommandBinding Command="{StaticResource F2}" CanExecute="CanExecute" Executed="F2" />
+        <CommandBinding Command="{StaticResource F3}" CanExecute="CanExecute" Executed="F3" />
+        <CommandBinding Command="{StaticResource F4}" CanExecute="CanExecute" Executed="F4" />
+        <CommandBinding Command="{StaticResource Save}" CanExecute="CanExecute" Executed="saveProject_Click" />
+        <CommandBinding Command="{StaticResource Choose}" CanExecute="CanExecute" Executed="ChooseFile" />
+        <CommandBinding Command="{StaticResource Return}" CanExecute="CanExecute" Executed="DeleteLane" />
+        <CommandBinding Command="{StaticResource ZoomIn}" CanExecute="CanExecute" Executed="ZoomIn" />
+        <CommandBinding Command="{StaticResource ZoomOut}" CanExecute="CanExecute" Executed="ZoomOut" />
+    </Window.CommandBindings>
+    <Grid x:Name="grid">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Menu x:Name="menu" HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="20" FontSize="14" Width="{Binding Width, ElementName=grid}">
+            <MenuItem Header="檔案" Height="20" Width="50">
+                <MenuItem x:Name="readFolder" Header="讀取資料夾" Click="readFolder_Click" />
+                <MenuItem x:Name="saveProject" Header="儲存專案檔" Click="saveProject_Click" Command ="{StaticResource Save}" IsEnabled="False" />
+                <MenuItem Header="測試" Click="test_Click"/>
+            </MenuItem>
+            <MenuItem Header="設定" Height="20" Width="50">
+                <MenuItem x:Name="transform_setting" Header="投影座標參數" IsEnabled="False" />
+                <MenuItem Header="PCI參數" IsEnabled="False"/>
+            </MenuItem>
+            <MenuItem Header="匯出" Height="20" Width="50">
+                <MenuItem x:Name="export_menu" Header="匯出PCI/破壞資訊" Click="export_Click" />
+            </MenuItem>
+            <MenuItem x:Name="explanation" Header="說明" Height="20" Width="44" Click="explanation_Click"/>
+        </Menu>
+        <Grid x:Name="grid1" VerticalAlignment="Top" Height="205" Margin="0,20,0,0" Width="{Binding Width, ElementName=grid}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Rectangle Fill="#FFCDCDCD" HorizontalAlignment="Left" Height="207" VerticalAlignment="Top" Width="1912" Margin="0,0,0,-2"/>
+            <TextBlock x:Name="txt1" Height="18" TextWrapping="Wrap" VerticalAlignment="Top" Margin="10,13,0,0" HorizontalAlignment="Left" FontSize="14" Text="路徑來源" IsEnabled="False"/>
+            <TextBlock x:Name="fileName_TextBlock" HorizontalAlignment="Left" Margin="818,13,0,0" TextWrapping="Wrap" Text="圖名" VerticalAlignment="Top"/>
+            <ComboBox x:Name="fileName_Combo" HorizontalAlignment="Left" Margin="847,9,0,0" VerticalAlignment="Top" Width="163" Height="25" FontSize="{Binding FontSize, ElementName=fileName_TextBlock}" SelectionChanged="fileName_Combo_SelectionChanged"/>
+            <TextBlock x:Name="roadType_TextBlock" HorizontalAlignment="Left" Margin="1042,15,0,0" TextWrapping="Wrap" Text="道路類型" VerticalAlignment="Top"/>
+            <ComboBox x:Name="roadType_Combo" HorizontalAlignment="Left" Margin="1095,9,0,0" VerticalAlignment="Top" Width="88" FontSize="{Binding FontSize, ElementName=roadType_TextBlock}" Height="25" SelectionChanged="roadType_Combo_SelectionChanged">
+                <ComboBoxItem Content="市區道路"/>
+                <ComboBoxItem Content="省縣鄉道"/>
+                <ComboBoxItem Content="隧道"/>
+                <ComboBoxItem Content="橋梁"/>
+            </ComboBox>
+            <TextBlock x:Name="date_TextBlock" HorizontalAlignment="Left" Margin="646,16,0,0" TextWrapping="Wrap" Text="日期" VerticalAlignment="Top"/>
+            <DatePicker x:Name="datePicker" HorizontalAlignment="Left" Margin="675,10,0,0" VerticalAlignment="Top" DisplayDate="2020-10-26"  SelectedDate="{x:Static System:DateTime.Now}" Width="110" Height="25" SelectedDateChanged="datePicker_SelectedDateChanged" />
+            <TextBlock x:Name="direction_TextBlock" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Margin="1245,15,0,0"><Run Text="車道"/><Run Text="線數量"/></TextBlock>
+            <TextBox x:Name="path_Textbox" HorizontalAlignment="Left" Height="24" Margin="71,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="570" IsEnabled="False"/>
+            <GroupBox x:Name="city_Group" Header="市區道路" HorizontalAlignment="Left" Height="115" Margin="1032,45,0,0" VerticalAlignment="Top" Width="450" IsEnabled="False">
+                <Canvas Margin="0">
+                    <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap"  Text="縣市" VerticalAlignment="Top" Canvas.Left="10" Canvas.Top="22" FontSize="{Binding FontSize, ElementName=city_Group}"/>
+                    <TextBox x:Name="city_TextBox" TextWrapping="Wrap" Height="19" Canvas.Left="39" Width="81" Canvas.Top="22" FontSize="{Binding FontSize, ElementName=city_Group}"/>
+                    <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="起點路口" VerticalAlignment="Top" Canvas.Top="59" Canvas.Left="9" FontSize="{Binding FontSize, ElementName=city_Group}"/>
+                    <TextBox x:Name="cityStart_TextBox" HorizontalAlignment="Left" Height="19" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Canvas.Left="63" Canvas.Top="55" FontSize="{Binding FontSize, ElementName=city_Group}"/>
+                    <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="終點路口" VerticalAlignment="Top" Canvas.Left="217" Canvas.Top="55" FontSize="{Binding FontSize, ElementName=city_Group}"/>
+                    <TextBox x:Name="cityEnd_TextBox" HorizontalAlignment="Left" Height="19" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Canvas.Left="271" Canvas.Top="55" FontSize="{Binding FontSize, ElementName=city_Group}"/>
+                    <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="市區道路名稱" VerticalAlignment="Top" Canvas.Left="140" Canvas.Top="21" FontSize="{Binding FontSize, ElementName=city_Group}"/>
+                    <TextBox x:Name="cityRoad_TextBox" HorizontalAlignment="Left" Height="19" TextWrapping="Wrap" VerticalAlignment="Top" Width="174" Canvas.Left="217" Canvas.Top="18" FontSize="{Binding FontSize, ElementName=city_Group}"/>
+                </Canvas>
+            </GroupBox>
+            <GroupBox x:Name="country_Group" Header="省縣鄉道、隧道、橋梁" HorizontalAlignment="Left" Height="115" Margin="1487,45,0,0" VerticalAlignment="Top" Width="415" IsEnabled="False">
+                <Canvas Margin="0,0,0,3">
+                    <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="省縣鄉道/隧道/橋梁" VerticalAlignment="Top" Canvas.Left="7" Canvas.Top="21" FontSize="{Binding FontSize, ElementName=country_Group}"/>
+                    <TextBox x:Name="country_TextBox" TextWrapping="Wrap" FontSize="{Binding FontSize, ElementName=country_Group}" Height="19" Canvas.Left="118" Width="102" Canvas.Top="18"/>
+                    <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="起點路口" VerticalAlignment="Top" FontSize="{Binding FontSize, ElementName=country_Group}" Canvas.Top="59" Canvas.Left="7"/>
+                    <TextBox x:Name="countryStart_TextBox" HorizontalAlignment="Left" Height="19" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontSize="{Binding FontSize, ElementName=country_Group}" Canvas.Left="61" Canvas.Top="55"/>
+                    <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="終點路口" VerticalAlignment="Top" FontSize="{Binding FontSize, ElementName=country_Group}" Canvas.Left="220" Canvas.Top="56"/>
+                    <TextBox x:Name="countryEnd_TextBox" HorizontalAlignment="Left" Height="19" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" FontSize="{Binding FontSize, ElementName=country_Group}" Canvas.Left="273" Canvas.Top="55"/>
+                </Canvas>
+            </GroupBox>
+            <ListView x:Name="listView" HorizontalAlignment="Left" Height="138" VerticalAlignment="Top" Width="461" Margin="10,40,0,0">
+                <ListView.View>
+                    <GridView AllowsColumnReorder="False">
+                        <GridViewColumn Header="破壞類型" DisplayMemberBinding="{Binding Category}" Width="100"/>
+                        <GridViewColumn Header="破壞程度" DisplayMemberBinding="{Binding Level}" Width="70"/>
+                        <GridViewColumn Header="線段長" DisplayMemberBinding="{Binding Longth, StringFormat=\{0:0.00\}}" Width="60"/>
+                        <GridViewColumn Header="線段寬" DisplayMemberBinding="{Binding Width, StringFormat=\{0:0.00\}}" Width="60"/>
+                        <GridViewColumn Header="面積/PCI" DisplayMemberBinding="{Binding Area, StringFormat=\{0:0.00\}}" Width="80"/>
+                        <GridViewColumn Header="所在車道" DisplayMemberBinding="{Binding Lane, StringFormat=\{0\}}" Width="80"/>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+            <GroupBox x:Name="lane_Group" Header="車道線" Height="55" VerticalAlignment="Top" Margin="476,105,0,0" Width="354" HorizontalAlignment="Left">
+                <Canvas Margin="0,0,-2,3">
+                    <RadioButton x:Name="lane0" Content="車道1(F1)" HorizontalAlignment="Left" VerticalAlignment="Top" RenderTransformOrigin="-0.123,0.429" Canvas.Top="10" Click="lane_CheckedChanged" IsChecked="True" Height="14" OpacityMask="#FFE06D6D" FontWeight="Bold" Foreground="Blue" FontSize="14"/>
+                    <RadioButton x:Name="lane1" Content="車道2(F2)" HorizontalAlignment="Left" VerticalAlignment="Top" Canvas.Top="10" Click="lane_CheckedChanged" Canvas.Left="84" FontWeight="Bold" Foreground="#FF1FA412" FontSize="14"/>
+                    <RadioButton x:Name="lane2" Content="車道3(F3)" HorizontalAlignment="Left" VerticalAlignment="Top" Canvas.Top="10" Click="lane_CheckedChanged" Canvas.Left="170" Foreground="Red" FontWeight="Bold" FontSize="14"/>
+                    <RadioButton x:Name="lane3" Content="車道4(F4)" HorizontalAlignment="Left" VerticalAlignment="Top" Canvas.Left="256" Canvas.Top="10" Click="lane_CheckedChanged" FontWeight="Bold" Foreground="#E57D007D" FontSize="14"/>
+                </Canvas>
+            </GroupBox>
+            <GroupBox x:Name="city_Group_Copy" Header="樁號" HorizontalAlignment="Left" Height="55" Margin="476,45,0,0" VerticalAlignment="Top" Width="354">
+                <Canvas Margin="0">
+                    <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Canvas.Left="10" Canvas.Top="10" FontSize="{Binding FontSize, ElementName=city_Group}"><Run Text="起始樁號"/><Run Text="("/><Run Text="K"/><Run Text=")"/></TextBlock>
+                    <TextBox x:Name="stake_TextBox" TextWrapping="Wrap" Height="19" Canvas.Left="82" Width="81" Canvas.Top="9" FontSize="{Binding FontSize, ElementName=city_Group}" Text="0"/>
+                    <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Canvas.Left="189" Canvas.Top="10" FontSize="{Binding FontSize, ElementName=city_Group}" RenderTransformOrigin="0.556,0.525"><Run Text="間隔"/><Run Text="(m)"/></TextBlock>
+                    <TextBox x:Name="space_TextBox" HorizontalAlignment="Left" Height="19" TextWrapping="Wrap" VerticalAlignment="Top" Width="83" Canvas.Left="237" Canvas.Top="9" FontSize="{Binding FontSize, ElementName=city_Group}" Text="10"/>
+                </Canvas>
+            </GroupBox>
+            <GroupBox x:Name="city_Group_Copy1" Header="車道寬度/長度" HorizontalAlignment="Left" Height="115" Margin="835,45,0,0" VerticalAlignment="Top" Width="192">
+                <Canvas Margin="0">
+                    <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Canvas.Left="10" Canvas.Top="20" FontSize="{Binding FontSize, ElementName=city_Group}"><Run Text="車道"/><Run Text="寬"/><Run Text="(m)"/></TextBlock>
+                    <TextBox x:Name="laneWide_TextBox" TextWrapping="Wrap" Height="19" Canvas.Left="70" Width="81" Canvas.Top="16" FontSize="{Binding FontSize, ElementName=city_Group}" Text="3.5"/>
+                    <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Canvas.Left="10" Canvas.Top="59" FontSize="{Binding FontSize, ElementName=city_Group}" RenderTransformOrigin="-2.014,0.656"><Run Text="路長"/><Run Text="(m)"/></TextBlock>
+                    <TextBox x:Name="laneLongth_TextBox" HorizontalAlignment="Left" Height="19" TextWrapping="Wrap" VerticalAlignment="Top" Width="83" Canvas.Left="58" Canvas.Top="55" FontSize="{Binding FontSize, ElementName=city_Group}" UndoLimit="10" Text="10"/>
+                </Canvas>
+            </GroupBox>
+            <ComboBox x:Name="laneType_Combo" HorizontalAlignment="Left" Margin="1310,9,0,0" VerticalAlignment="Top" Width="58" FontSize="{Binding FontSize, ElementName=roadType_TextBlock}" Height="25" SelectionChanged="laneType_Combo_SelectionChanged">
+                <ComboBoxItem Content="1" Margin="0,0,3,0"/>
+                <ComboBoxItem Content="2" Margin="0,0,3,0"/>
+                <ComboBoxItem Content="3" Margin="0,0,1,0"/>
+                <ComboBoxItem Content="4" HorizontalAlignment="Left" Width="57"/>
+            </ComboBox>
+        </Grid>
+        <Grid x:Name="grid2" Background="#FFECFBF6" Margin="0,205,0,0" RenderTransformOrigin="0.5,0.5" AllowDrop="False" Width="{Binding Width, ElementName=grid}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Control:ImageViewBox x:Name="image_show" HorizontalAlignment="Left" Height="1684" VerticalAlignment="Top" Width="3070" Margin="0,0,-1158,-880" IsEnabled="False"/>
+            <ListView x:Name="humanCount_listView" HorizontalAlignment="Left" Height="302" Margin="1698,0,0,0" VerticalAlignment="Top" Width="192" IsSynchronizedWithCurrentItem="True" MouseUp="humanCount_listView_MouseUp">
+                <ListView.View>
+                    <GridView AllowsColumnReorder="False">
+                        <GridViewColumn Header="破壞類型" DisplayMemberBinding="{Binding Category}" Width="100"/>
+                        <GridViewColumn Header="數量" DisplayMemberBinding="{Binding Number, StringFormat=\{0\}}" Width="80"/>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </Grid>
+    </Grid>
+</Window>

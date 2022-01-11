@@ -1,0 +1,20 @@
+﻿<UserControl
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:drawing_lane.Control"
+             xmlns:DataBinding="clr-namespace:WpfTutorialSamples.DataBinding" x:Class="drawing_lane.Control.ImageViewBox"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800" Width="3824" Height="1960">
+    <UserControl.Resources>
+        <DataBinding:ScrollOffset_to_Position x:Key="ScrollOffset_to_Position"/>
+    </UserControl.Resources>
+    <Viewbox x:Name="Viewbox" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Stretch="Fill" Width="3824" Height="1960">
+        <Grid x:Name="grid" Height="1959.7" Width="3824" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <ScrollViewer x:Name="scrollViewer" Height="811" Width="1912" HorizontalScrollBarVisibility="Visible" VerticalAlignment="Top" VerticalContentAlignment="Center" HorizontalAlignment="Left" PreviewMouseLeftButtonDown="scrollViewer_PreviewMouseLeftButtonDown" PreviewMouseMove="scrollViewer_PreviewMouseMove">
+                <Canvas x:Name="canvas" Height="695" Width="1902" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            </ScrollViewer>            
+        </Grid>
+    </Viewbox>
+</UserControl>
