@@ -55,26 +55,15 @@ namespace drawing_lane
             getData getdata = new getData();
             path = getdata.SelectedPath();            
 
-            string line;
             string[] str = path.Split('\\');
             folder_name = str[str.Length - 1];
 
             #region check files and folders exist
-            if (!Directory.Exists(path + "/json/"))
+            if (!Directory.Exists(path + "/lane/"))
             {
-                MessageBox.Show("沒有json資料夾");
+                MessageBox.Show("沒有lane資料夾");
                 return;
-            }
-            //if (!Directory.Exists(path + "/rawImage/"))
-            //{
-            //    MessageBox.Show("沒有rawImage資料夾");
-            //    return;
-            //}
-            //if (!Directory.Exists(path + "/unObjectImage/"))
-            //{
-            //    MessageBox.Show("沒有unObjectImage資料夾");
-            //    return;
-            //}
+            }            
             if (!Directory.Exists(path + "/image/"))
             {
                 MessageBox.Show("沒有image資料夾");
@@ -84,22 +73,7 @@ namespace drawing_lane
             {
                 MessageBox.Show("沒有objectImage資料夾");
                 return;
-            }
-            //getting txt_path
-            string[] t = Directory.GetFiles(path);
-            string txt_path = "";
-            foreach (string temp in t)
-            {
-                if (temp.Contains("DetectInfo"))
-                {
-                    txt_path = temp;
-                }
-            }
-            if(txt_path == "")
-            {
-                MessageBox.Show("沒有DetectInfo文字檔");
-                return;
-            }
+            }            
             #endregion
 
             //read image data names
@@ -111,78 +85,50 @@ namespace drawing_lane
                     continue;
                 }
                 string[] path_name = item.Split('/');
-                string[] temp = path_name[2].Split('_');
-                temp[1] = temp[1].Insert(6, "-");
-                temp[1] = temp[1].Insert(4, "-");
-                temp[2] = temp[2].Insert(6, ".");
-                temp[2] = temp[2].Insert(4, ":");
-                temp[2] = temp[2].Insert(2, ":");
                 aiDataList.Add(new aiData
                 {
-                    Date = temp[1] + ' ' + temp[2],
-                    License = temp[0],
-                    OriginalName = path_name[2],
-                    PCI = new List<double>()
+                    OriginalName = path_name[2]                    
                 });
             }
 
             //getting damage list
-            using (StreamReader txt = new StreamReader(txt_path, System.Text.Encoding.UTF8))
+            string[] damage_list = Directory.GetFiles(path + "/JSON/");
+            foreach (string item in damage_list)
             {
-                while (true)
+                string fileExt = Path.GetExtension(item);
+                if (fileExt == ".json")
                 {
-                    line = txt.ReadLine();
-                    if (line == null || line.Length < 10)
+                    using (StreamReader read = new StreamReader(item))
                     {
-                        break;
-                    }
-                    path_Textbox.Text = line;
-                    string[] temp = line.Split('\t');
-                    int index = aiDataList.FindIndex(x => x.OriginalName == temp[2]);
-                    string[] tt = temp[11].Split(new char[3] { '[', ',', ']' });
-                    if (index != -1) //damage on same image
-                    {
-                        aiDataList[index].AfterName = temp[3];
-                        aiDataList[index].Longtitude = Convert.ToDouble(temp[8]);
-                        aiDataList[index].Latitude = Convert.ToDouble(temp[9]);
-                        aiDataList[index].Damages.Add(new damageData
+                        string data = read.ReadToEnd();
+                        if (data != "")
                         {
-                            Longth = Convert.ToDouble(temp[4]),
-                            Width = Convert.ToDouble(temp[5]),
-                            Area = Convert.ToDouble(temp[6]),
-                            Level = temp[7],
-                            Category = temp[10],
-                            LeftPoint = new Point { X = Convert.ToDouble(tt[2]), Y = Convert.ToDouble(tt[1]) },
-                            RightPoint = new Point { X = Convert.ToDouble(tt[4]), Y = Convert.ToDouble(tt[3]) }
-                        });
+                            aiData j = new aiData();
+                            j = JsonConvert.DeserializeObject<aiData>(data);
+
+                            int index = aiDataList.FindIndex(x => x.OriginalName == j.OriginalName);
+                            if (index != -1) //damage on same image
+                            {
+                                aiDataList[index] = j;
+                                aiDataList[index].PCI = new List<double>();
+                                if (j.Shape.Count != 0)
+                                {
+                                    foreach (damageData d in aiDataList[index].Shape)
+                                    {
+                                        d.Category = cal.ToChineseCate(d.Category);
+                                        d.Level = cal.ToChineseLevel(d.Level);
+                                    }
+                                }
+                                else
+                                {
+                                    aiDataList[index].AfterName = null;
+                                }
+                            }
+                        }
                     }
-                    else //new image
-                    {
-                        aiDataList.Add(new aiData
-                        {
-                            Date = temp[0],
-                            License = temp[1],
-                            OriginalName = temp[2],
-                            AfterName = temp[3],
-                            Longtitude = Convert.ToDouble(temp[8]),
-                            Latitude = Convert.ToDouble(temp[9]),
-                            PCI = new List<double>()
-                        });
-                        aiDataList[aiDataList.Count - 1].Damages.Add(new damageData
-                        {
-                            Longth = Convert.ToDouble(temp[4]),
-                            Width = Convert.ToDouble(temp[5]),
-                            Area = Convert.ToDouble(temp[6]),
-                            Level = temp[7],
-                            Category = temp[10],
-                            LeftPoint = new Point { X = Convert.ToDouble(tt[2]), Y = Convert.ToDouble(tt[1]) },
-                            RightPoint = new Point { X = Convert.ToDouble(tt[4]), Y = Convert.ToDouble(tt[3]) }
-                        });
-                    }
-                }
-                txt.Close();
-                txt.Dispose();
+                }                
             }
+
             //using Date to sort
             aiDataList.Sort((x, y) => x.Date.CompareTo(y.Date));
 
@@ -281,15 +227,15 @@ namespace drawing_lane
 
             for (int i = 0; i < aiDataList.Count; i++)
             {
-                if (aiDataList[i].Damages != null)
+                if (aiDataList[i].Shape != null)
                 {
                     //sort damages by lane
-                    aiDataList[i].Damages.Sort((x, y) => x.Lane.CompareTo(y.Lane));
+                    aiDataList[i].Shape.Sort((x, y) => x.Lane.CompareTo(y.Lane));
                     aiDataList[i] = cal.CalLanePlace(path, aiDataList[i]);
                     aiDataList[i].PCI.Clear();
-                    for (int j = 0; j <= aiDataList[i].Lane; j++)
+                    for (int j = 0; j <= aiDataList[i].LaneNumber; j++)
                     {
-                        aiDataList[i].PCI.Add(cal.PCI(j, aiDataList[i].Damages, Convert.ToDouble(laneWide_TextBox.Text), Convert.ToDouble(laneLongth_TextBox.Text)));
+                        aiDataList[i].PCI.Add(cal.PCI(j, aiDataList[i].Shape, Convert.ToDouble(laneWide_TextBox.Text), Convert.ToDouble(laneLongth_TextBox.Text)));
                     }
                 }
             }
@@ -320,9 +266,10 @@ namespace drawing_lane
         private void explanation_Click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("1. 資料夾配置\n" +
-                "image = rawImage: 有被辨識到照片的原始檔 + unObjectImage: 沒有被辨識到照片的原始檔\n" +
-                "objectImage: 有被辨識到照片的辨識後圖片\n" +
-                "json: 車道辨識後用以儲存車道線資訊的資料夾\n" +
+                "image = 所有照片的原始檔\n" +
+                "objectImage: 有被辨識到破壞的辨識後圖片\n" +
+                "lane: 車道辨識後用以儲存車道線資訊的資料夾\n" +
+                "JSON: 重新調整過的破壞json檔資料夾\n" +
                 "DetectInfo_yyyy_mm_dd.txt: 裡面會包含拍攝時間、車號、辨識前照片名、辨識後照片名、破壞長度、破壞寬度、破壞面積、程度、經度、緯度、破壞種類、[左上x座標, 左上y座標, 右上x座標, 右上y座標]及標案號碼\n\n" +
                 "2.軟體功能簡介\n" +
                 "A.上方資訊區\n" +
@@ -333,6 +280,7 @@ namespace drawing_lane
                 "車道線數量: 可選擇車道線數量\n" +
                 "破壞資訊表: 表格內會顯示此張照片被辨識到的資訊，依序是破壞類型、破壞程度、線段長、線段寬、面積和所在的車道，最底為計算出的各車道的PCI值\n" +
                 "(車道會在畫了車道線，並且按下儲存後會再次計算並改變)\n" +
+                "車道的表示方式: 0 (車道線1) 1 (車道線2) 2 (車道線3) 3 (車道線4) 4\n" +
                 "樁號: 可自行設定起始樁號和間隔\n" +
                 "車道線: 車道線數量改變後即可多畫幾條車道線\n" +
                 "車道寬度 / 長度: 每張照片的車道寬和長度，用來計算PCI值\n\n" +
@@ -572,18 +520,19 @@ namespace drawing_lane
 
         private void CalLane(int index)
         {
-            if (aiDataList[index].Damages != null)
+            if (aiDataList[index].Shape != null)
             {
                 listView.Items.Clear();
                 aiDataList[index] = cal.CalLanePlace(path, aiDataList[index]);
-                foreach (damageData damage in aiDataList[index].Damages)
+                foreach (damageData damage in aiDataList[index].Shape)
                 {
                     listView.Items.Add(damage);
-                }
+                }                
+
                 aiDataList[index].PCI.Clear();
                 for (int i = 0; i <= image_show.return_laneNum(); i++)
                 {
-                    double PCI = cal.PCI(i, aiDataList[index].Damages, Convert.ToDouble(laneWide_TextBox.Text), Convert.ToDouble(laneLongth_TextBox.Text));
+                    double PCI = cal.PCI(i, aiDataList[index].Shape, Convert.ToDouble(laneWide_TextBox.Text), Convert.ToDouble(laneLongth_TextBox.Text));
                     aiDataList[index].PCI.Add(PCI);
                     if (PCI != 100)
                     {
@@ -608,103 +557,6 @@ namespace drawing_lane
         }
         #endregion
 
-        private void test_Click(object sender, RoutedEventArgs e)
-        {
-            AppDomain currentDomain = AppDomain.CurrentDomain;
-            currentDomain.UnhandledException += new UnhandledExceptionEventHandler(MyHandler);
-
-            #region resetting
-            path = "";
-            folder_name = "";
-            human.Clear();
-            humanCount_listView.Items.Clear();
-            oldfilenum = -1;
-            aiDataList.Clear();
-            basicDatas = new basicData();
-            fileName_Combo.Items.Clear();
-            fileName_Combo.SelectedIndex = -1;
-            oldfilenum = -1;
-            #endregion
-
-            //open choose file window
-            getData getdata = new getData();
-            path = getdata.SelectedPath();
-
-            string line;
-            string[] str = path.Split('\\');
-            folder_name = str[str.Length - 1];
-
-            #region check files and folders exist
-            if (!Directory.Exists(path + "/json/"))
-            {
-                MessageBox.Show("沒有json資料夾");
-                return;
-            }        
-            if (!Directory.Exists(path + "/image/"))
-            {
-                MessageBox.Show("沒有image資料夾");
-                return;
-            }
-            if (!Directory.Exists(path + "/objectImage/"))
-            {
-                MessageBox.Show("沒有objectImage資料夾");
-                return;
-            }
-            //getting txt_path
-            string[] t = Directory.GetFiles(path);
-            string txt_path = "";
-            foreach (string temp in t)
-            {
-                if (temp.Contains("DetectInfo"))
-                {
-                    txt_path = temp;
-                }
-            }
-            if (txt_path == "")
-            {
-                MessageBox.Show("沒有DetectInfo文字檔");
-                return;
-            }
-            #endregion
-
-            //read image data names
-            string[] unObject_list = Directory.GetFiles(path + "/image/");
-            foreach (string item in unObject_list)
-            {
-                if (item.Contains("desktop.ini"))
-                {
-                    continue;
-                }
-                string[] path_name = item.Split('/');
-                string[] temp = path_name[2].Split('_');
-                temp[1] = temp[1].Insert(6, "-");
-                temp[1] = temp[1].Insert(4, "-");
-                temp[2] = temp[2].Insert(6, ".");
-                temp[2] = temp[2].Insert(4, ":");
-                temp[2] = temp[2].Insert(2, ":");
-                aiDataList.Add(new aiData
-                {
-                    Date = temp[1] + ' ' + temp[2],
-                    License = temp[0],
-                    OriginalName = path_name[2],
-                    PCI = new List<double>()
-                });
-            }
-
-            //getting damage list
-            string[] damage_list = Directory.GetFiles(path + "/damage/");
-            foreach(string item in damage_list)
-            {
-                using (StreamReader read = new StreamReader(item))
-                {
-                    string data = read.ReadToEnd();
-                    if (data != "")
-                    {
-                        sData j = new sData();
-                        j = JsonConvert.DeserializeObject<sData>(data);
-                    }                    
-                }
-            }
-        }
+        
     }
 }

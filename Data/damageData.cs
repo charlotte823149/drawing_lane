@@ -8,13 +8,14 @@ namespace drawing_lane.Data
 {
     public class damageData
     {
-        public double Longth { get; set; }
+        public string Category { get; set; }
+        public string Level { get; set; }
+        public int Lane { get; set; }
+        public double Length { get; set; }
         public double Width { get; set; }
         public double Area { get; set; }
-        public string Level { get; set; }
-        public string Category { get; set; }
-        public Point LeftPoint { get; set; }
-        public Point RightPoint { get; set; }
-        public int Lane { get; set; }
+        public double[] Box { get; set; }
+        public List<List<int[]>> contours { get; set; }
+
     }
 }

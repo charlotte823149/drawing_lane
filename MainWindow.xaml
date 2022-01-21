@@ -55,7 +55,6 @@
             <MenuItem Header="檔案" Height="20" Width="50">
                 <MenuItem x:Name="readFolder" Header="讀取資料夾" Click="readFolder_Click" />
                 <MenuItem x:Name="saveProject" Header="儲存專案檔" Click="saveProject_Click" Command ="{StaticResource Save}" IsEnabled="False" />
-                <MenuItem Header="測試" Click="test_Click"/>
             </MenuItem>
             <MenuItem Header="設定" Height="20" Width="50">
                 <MenuItem x:Name="transform_setting" Header="投影座標參數" IsEnabled="False" />
@@ -112,7 +111,7 @@
                     <GridView AllowsColumnReorder="False">
                         <GridViewColumn Header="破壞類型" DisplayMemberBinding="{Binding Category}" Width="100"/>
                         <GridViewColumn Header="破壞程度" DisplayMemberBinding="{Binding Level}" Width="70"/>
-                        <GridViewColumn Header="線段長" DisplayMemberBinding="{Binding Longth, StringFormat=\{0:0.00\}}" Width="60"/>
+                        <GridViewColumn Header="線段長" DisplayMemberBinding="{Binding Length, StringFormat=\{0:0.00\}}" Width="60"/>
                         <GridViewColumn Header="線段寬" DisplayMemberBinding="{Binding Width, StringFormat=\{0:0.00\}}" Width="60"/>
                         <GridViewColumn Header="面積/PCI" DisplayMemberBinding="{Binding Area, StringFormat=\{0:0.00\}}" Width="80"/>
                         <GridViewColumn Header="所在車道" DisplayMemberBinding="{Binding Lane, StringFormat=\{0\}}" Width="80"/>

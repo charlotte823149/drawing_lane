@@ -8,7 +8,7 @@ namespace drawing_lane.Data
 {
     public class statisticsData
     {
-        public List<double> Longth { get; set; }
+        public List<double> Length { get; set; }
         public List<double> Width { get; set; }
         public List<double> Area { get; set; }
         public string Level { get; set; }

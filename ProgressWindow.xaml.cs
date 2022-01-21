@@ -99,21 +99,20 @@ namespace drawing_lane
                         {
                             start = damage_start;
                             //only export aiData have damages
-                            if (aiDatas[i].Damages.Count != 0 && aiDatas[i].Damages != null)
+                            if (aiDatas[i].Shape.Count != 0 && aiDatas[i].Shape != null)
                             {
                                 //adding aiData
                                 double stake = basicData.Stake + basicData.Space * i * 0.001;
                                 data_ws.Cells[start, 1].Value = cal.StakeString(stake);
-                                data_ws.Cells[start, 2].Value = aiDatas[i].OriginalName + "_" + Convert.ToString(aiDatas[i].Lane);
-                                //data_ws.Cells[start, 2].AutoFitColumns(50, 100); //auto cell width
+                                data_ws.Cells[start, 2].Value = aiDatas[i].OriginalName + "_" + Convert.ToString(aiDatas[i].LaneNumber);
                                 data_ws.Cells[start, 5].Value = aiDatas[i].Longtitude + " - " + aiDatas[i].Latitude;
                                 data_ws.Cells[start, 6].Value = stake;
-                                double height = cellHeight / aiDatas[i].Damages.Count;
+                                double height = cellHeight / aiDatas[i].Shape.Count;
 
                                 //go through every lane
-                                for (int k = 0; k <= aiDatas[i].Lane; k++)
+                                for (int k = 0; k <= aiDatas[i].LaneNumber; k++)
                                 {
-                                    List<damageData> a = aiDatas[i].Damages.FindAll(x => x.Lane.Equals(k));
+                                    List<damageData> a = aiDatas[i].Shape.FindAll(x => x.Lane.Equals(k));
 
                                     if (a.Count != 0)
                                     {                                        
@@ -131,7 +130,7 @@ namespace drawing_lane
                                             //write damage data
                                             data_ws.Cells[damage_start, 9].Value = dama.Category;
                                             data_ws.Cells[damage_start, 10].Value = dama.Level;
-                                            data_ws.Cells[damage_start, 11].Value = dama.Longth;
+                                            data_ws.Cells[damage_start, 11].Value = dama.Length;
                                             data_ws.Cells[damage_start, 12].Value = dama.Width;
                                             data_ws.Cells[damage_start, 13].Value = dama.Area;
                                             damage_start += 1;

@@ -14,6 +14,42 @@ namespace drawing_lane.Function
         public double laneWide = 0;
         public double laneLongth = 0;
 
+        public string ToChineseCate(string Category)
+        {
+            switch (Category)
+            {                
+                case "Alligator_Cracking":
+                    return "鱷魚狀裂縫";
+                case "Cracking":
+                    return "線狀裂縫";
+                case "Patch":
+                    return "補綻";
+                case "Potholes":
+                    return "坑洞";
+                case "Raveling":
+                    return "剝脫";
+                case "Cover":
+                    return "人手孔蓋未平順";
+                default:
+                    return "";
+            }
+        }
+
+        public string ToChineseLevel(string Level)
+        {
+            switch (Level)
+            {
+                case "Low":
+                    return "輕";
+                case "Medeium":
+                    return "中";
+                case "High":
+                    return "重";
+                default:
+                    return "";
+            }
+        }
+
         public int CateToInt(string Category)
         {
             switch (Category)
@@ -102,78 +138,88 @@ namespace drawing_lane.Function
             return Convert.ToString(integer) + "K_" + Convert.ToString(dec * 1000).PadLeft(3, '0');            
         }
 
+        
         public aiData CalLanePlace(string path, aiData item)
         {
             string fileName;
             if (item.AfterName != null)
             {
-                fileName = item.AfterName.Replace("detection.jpg", "pave.json");
+                fileName = item.OriginalName.Replace(".jpg", ".json");
             }
             else
             {
-                fileName = item.OriginalName.Replace(".jpg", ".json");
+                return item;
             }
-            
-            if (File.Exists(path + "/json/" + fileName))
+
+            if (File.Exists(path + "/lane/" + fileName))
             {
                 //reset lane
-                foreach (damageData damage in item.Damages)
+                foreach (damageData damage in item.Shape)
                 {
                     damage.Lane = 0;
                 }
                 try
                 {
                     //open file and read lane information
-                    using (StreamReader read = new StreamReader(path + "/json/" + fileName))
+                    using (StreamReader read = new StreamReader(path + "/lane/" + fileName))
                     {
                         string data = read.ReadToEnd();
                         jsonData json = JsonConvert.DeserializeObject<jsonData>(data);
-                        item.Lane = json.lane.Count;
+                        item.LaneNumber = json.lane.Count;
                         for (int i = 0; i < json.lane.Count; i++)
                         {
                             if (json.lane[i].Count != 0)
                             {
-                                foreach (damageData damage in item.Damages)
+                                foreach (damageData damage in item.Shape)
                                 {
-                                    bool flag = false;
-                                    //0.16 = (1280 / 4000) / 2, 0.2 = (720 / 1800) / 2
-                                    double center_x = 0.16 * (damage.LeftPoint.X + damage.RightPoint.X);
-                                    double center_y = 0.2 * (damage.LeftPoint.Y + damage.RightPoint.Y);
-                                    
-                                    //find lane point at same height
-                                    for (int j = 0; j < json.lane[i].Count; j++)
-                                    {
-                                        if (Math.Abs(json.lane[i][j][1] - center_y) < 10)
+                                    int lane = 0;
+                                    foreach (List<int[]> a in damage.contours)
+                                    {                                        
+                                        foreach(int[] b in a)
                                         {
-                                            if (center_x > json.lane[i][j][0])
+                                            bool flag = false;
+                                            //0.16 = (1280 / 4000), 0.2 = (720 / 1800)
+                                            double x = 0.32 * b[0];
+                                            double y = 0.4 * b[1];
+                                            //find lane point at same height
+                                            for (int j = 0; j < json.lane[i].Count; j++)
                                             {
-                                                damage.Lane += 1;
-                                                flag = true;
+                                                if (Math.Abs(json.lane[i][j][1] - y) < 10)
+                                                {
+                                                    if (x > json.lane[i][j][0])
+                                                    {
+                                                        lane += 1;
+                                                        flag = true;
+                                                    }
+                                                    else
+                                                    {
+                                                        lane -= 1;
+                                                        flag = true;
+                                                    }
+                                                    break;
+                                                }
                                             }
-                                            else
+                                            //if lane did not long enough
+                                            if (!flag)
                                             {
-                                                damage.Lane += 0;
-                                                flag = true;
+                                                if (x > json.lane[i][json.lane[i].Count - 1][0])
+                                                {
+                                                    lane += 1;
+                                                }
+                                                else
+                                                {
+                                                    lane -= 0;
+                                                }
                                             }
-                                            break;
-                                        }                                       
-                                    }
-                                    
-                                    //if lane did not long enough
-                                    if (!flag)
-                                    {
-                                        if (center_x > json.lane[i][json.lane[i].Count - 1][0])
-                                        {
-                                            damage.Lane += 1;                                            
                                         }
-                                        else
-                                        {
-                                            damage.Lane += 0;
-                                        }                                        
+                                    }
+                                    if (lane >= 0)
+                                    {
+                                        damage.Lane += 1;
                                     }
                                 }
                             }
-                        }                                        
+                        }
                     }
                 }
                 catch
@@ -197,7 +243,7 @@ namespace drawing_lane.Function
                     {
                         statistics.Add(new statisticsData
                         {
-                            Longth = new List<double> { item.Longth },
+                            Length = new List<double> { item.Length },
                             Width = new List<double> { item.Width },
                             Area = new List<double> { item.Area },
                             Level = item.Level,
@@ -206,7 +252,7 @@ namespace drawing_lane.Function
                     }
                     else
                     {
-                        statistics[index].Longth.Add(item.Longth);
+                        statistics[index].Length.Add(item.Length);
                         statistics[index].Width.Add(item.Width);
                         statistics[index].Area.Add(item.Area);
                     }

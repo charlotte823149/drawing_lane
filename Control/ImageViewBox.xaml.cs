@@ -61,9 +61,9 @@ namespace drawing_lane.Control
             {
 				js = fileName.Replace(".jpg", ".json");
 			}
-			if (File.Exists(path + "/json/" + js))
+			if (File.Exists(path + "/lane/" + js))
             {
-				using (StreamReader read = new StreamReader(path + "/json/" + js))
+				using (StreamReader read = new StreamReader(path + "/lane/" + js))
 				{
 					string data = read.ReadToEnd();
 
@@ -217,7 +217,7 @@ namespace drawing_lane.Control
 				{
 					js = fileName.Replace(".jpg", ".json");
 				}
-				using (StreamWriter output = new StreamWriter(path + "/json/" + js))
+				using (StreamWriter output = new StreamWriter(path + "/lane/" + js))
 				{                    
                     string strJson = JsonConvert.SerializeObject(json, Formatting.Indented);
                     output.Write(strJson);
@@ -244,12 +244,12 @@ namespace drawing_lane.Control
 			{
 				js = fileName.Replace(".jpg", ".json");
 			}
-			if (File.Exists(path + "/json/" + js))
+			if (File.Exists(path + "/lane/" + js))
             {
 				try
 				{
 					reset();
-					using (StreamReader read = new StreamReader(path + "/json/" + js))
+					using (StreamReader read = new StreamReader(path + "/lane/" + js))
 					{
 						string data = read.ReadToEnd();
 

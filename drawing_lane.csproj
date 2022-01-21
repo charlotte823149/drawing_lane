@@ -27,7 +27,7 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ProductName>drawLane2021</ProductName>
     <PublisherName>王筑青</PublisherName>
-    <ApplicationRevision>9</ApplicationRevision>
+    <ApplicationRevision>11</ApplicationRevision>
     <ApplicationVersion>2.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -138,9 +138,7 @@
     <Compile Include="Data\aiData.cs" />
     <Compile Include="Data\basicData.cs" />
     <Compile Include="Data\damageData.cs" />
-    <Compile Include="Data\sData.cs" />
     <Compile Include="Data\humanCountData.cs" />
-    <Compile Include="Data\dData.cs" />
     <Compile Include="Data\jsonData.cs" />
     <Compile Include="Data\statisticsData.cs" />
     <Compile Include="Function\cal_fuction.cs" />
