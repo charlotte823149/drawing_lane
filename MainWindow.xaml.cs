@@ -98,7 +98,8 @@ namespace drawing_lane
                     Time = temp[2].Substring(0,2) + ':' + temp[2].Substring(2,2) + ':' + temp[2].Substring(4,2) + '.' + temp[2].Substring(6,3),
                     OriginalName = path_name[2],
                     Longitude = 0,
-                    Latitude = 0
+                    Latitude = 0,
+                    PCI = new List<double>()
                 });
             }
 
