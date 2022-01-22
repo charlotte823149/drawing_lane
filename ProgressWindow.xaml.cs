@@ -105,7 +105,7 @@ namespace drawing_lane
                                 double stake = basicData.Stake + basicData.Space * i * 0.001;
                                 data_ws.Cells[start, 1].Value = cal.StakeString(stake);
                                 data_ws.Cells[start, 2].Value = aiDatas[i].OriginalName + "_" + Convert.ToString(aiDatas[i].LaneNumber);
-                                data_ws.Cells[start, 5].Value = aiDatas[i].Longtitude + " - " + aiDatas[i].Latitude;
+                                data_ws.Cells[start, 5].Value = aiDatas[i].Longitude + " - " + aiDatas[i].Latitude;
                                 data_ws.Cells[start, 6].Value = stake;
                                 double height = cellHeight / aiDatas[i].Shape.Count;
 

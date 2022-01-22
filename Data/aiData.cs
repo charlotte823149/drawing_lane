@@ -9,7 +9,7 @@ namespace drawing_lane.Data
         public string License { get; set; }
         public string OriginalName { get; set; }
         public string AfterName { get; set; }
-        public double Longtitude { get; set; }
+        public double Longitude { get; set; }
         public double Latitude { get; set; }
         public List<damageData> Shape { get; set; } = new List<damageData>();
         

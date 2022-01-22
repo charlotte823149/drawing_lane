@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 namespace drawing_lane
 {
     public partial class MainWindow : Window
-    {     
+    {
         private static void MyHandler(object sender, UnhandledExceptionEventArgs e)
         {
             MessageBox.Show(e.ExceptionObject.ToString());
@@ -73,7 +73,12 @@ namespace drawing_lane
             {
                 MessageBox.Show("沒有objectImage資料夾");
                 return;
-            }            
+            }
+            if (!Directory.Exists(path + "/Json/"))
+            {
+                MessageBox.Show("沒有Json資料夾");
+                return;
+            }
             #endregion
 
             //read image data names
@@ -85,14 +90,20 @@ namespace drawing_lane
                     continue;
                 }
                 string[] path_name = item.Split('/');
+                string[] temp = path_name[2].Split('_');
+                
                 aiDataList.Add(new aiData
                 {
-                    OriginalName = path_name[2]                    
+                    Date = temp[1].Substring(0,4) + '-' + temp[1].Substring(4,2) + '-' + temp[1].Substring(6,2),
+                    Time = temp[2].Substring(0,2) + ':' + temp[2].Substring(2,2) + ':' + temp[2].Substring(4,2) + '.' + temp[2].Substring(6,3),
+                    OriginalName = path_name[2],
+                    Longitude = 0,
+                    Latitude = 0
                 });
             }
 
             //getting damage list
-            string[] damage_list = Directory.GetFiles(path + "/JSON/");
+            string[] damage_list = Directory.GetFiles(path + "/Json/");
             foreach (string item in damage_list)
             {
                 string fileExt = Path.GetExtension(item);
@@ -227,7 +238,7 @@ namespace drawing_lane
 
             for (int i = 0; i < aiDataList.Count; i++)
             {
-                if (aiDataList[i].Shape != null)
+                if (aiDataList[i].Shape != null && aiDataList[i].Shape.Count != 0)
                 {
                     //sort damages by lane
                     aiDataList[i].Shape.Sort((x, y) => x.Lane.CompareTo(y.Lane));
